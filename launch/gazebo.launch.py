@@ -44,7 +44,11 @@ def generate_launch_description():
         executable='spawn_entity.py',
         arguments=[
             '-topic', 'robot_description',
-            '-entity', 'my_robot'
+            '-entity', 'my_robot',
+            '-x', '68',
+            '-y', '-1.6',
+            '-z', '-1.5',
+            '-Y', '1.53'
         ],
         output='screen'
     )
