@@ -11,12 +11,11 @@ MeshToPointCloud::~MeshToPointCloud()
         pub_thread.join();
 }
 
-void MeshToPointCloud::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
+void MeshToPointCloud::Load(rendering::VisualPtr _visual, sdf::ElementPtr _sdf)
 {
-    model = _model;
-    gzmsg << "MeshToPointCloud plugin loaded for model: "
-          << model->GetName() << "\n";
-
+    visual = _visual;
+    gzmsg << "MeshToPointCloud plugin loaded for visual: "
+          << visual->GetMeshName()<< "\n";
     std::string topic_name = "mesh_vertices"; // default
 
     if (_sdf->HasElement("topic"))
@@ -27,14 +26,7 @@ void MeshToPointCloud::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     ros_node = gazebo_ros::Node::Get(_sdf);
     pub = ros_node->create_publisher<sensor_msgs::msg::PointCloud2>(topic_name, 10);
 
-    // ----------------------------- Load the mesh -----------------------------
-    if (!_sdf->HasElement("mesh_uri"))
-    {
-        gzerr << "MeshToPointCloud plugin needs <mesh_uri>\n";
-        return;
-    }
-
-    std::string meshUri = _sdf->Get<std::string>("mesh_uri");
+    std::string meshUri = visual->GetMeshName();
     auto *mgr = gazebo::common::MeshManager::Instance();
     const gazebo::common::Mesh *mesh = mgr->Load(meshUri);
 
@@ -48,6 +40,8 @@ void MeshToPointCloud::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     int *indexArray = nullptr;
     mesh->FillArrays(&vertexArray, &indexArray);
     unsigned int numVertices = mesh->GetVertexCount();
+    ignition::math::Vector3d scale = _visual->Scale();
+
 
     gzmsg << "Loaded mesh with " << numVertices << " vertices\n";
 
@@ -78,9 +72,9 @@ void MeshToPointCloud::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
     for (unsigned int i = 0; i < numVertices; i++)
     {
-        *iterX = vertexArray[i * 3 + 0];
-        *iterY = vertexArray[i * 3 + 1];
-        *iterZ = vertexArray[i * 3 + 2];
+        *iterX = vertexArray[i * 3 + 0] * scale.X();
+        *iterY = vertexArray[i * 3 + 1] * scale.Y();
+        *iterZ = vertexArray[i * 3 + 2] * scale.Z();
 
         ++iterX;
         ++iterY;
@@ -108,4 +102,4 @@ void MeshToPointCloud::PublishThread()
     }
 }
 
-GZ_REGISTER_MODEL_PLUGIN(MeshToPointCloud)
+GZ_REGISTER_VISUAL_PLUGIN(MeshToPointCloud)

@@ -7,6 +7,10 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo_ros/node.hpp>
 
+#include <gazebo/rendering/Visual.hh>
+#include <gazebo/rendering/Scene.hh>
+#include <gazebo/common/Plugin.hh>
+
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <std_msgs/msg/int32.hpp>
@@ -14,17 +18,17 @@
 
 namespace gazebo
 {
-  class MeshToPointCloud : public ModelPlugin
+  class MeshToPointCloud : public VisualPlugin
   {
   public:
     MeshToPointCloud();
     ~MeshToPointCloud();
-    void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) override;
+    void Load(rendering::VisualPtr _visual, sdf::ElementPtr _sdf) override;
 
   private:
     void PublishThread();
-
-    physics::ModelPtr model;
+    
+    rendering::VisualPtr visual;
     gazebo_ros::Node::SharedPtr ros_node;
 
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub;
