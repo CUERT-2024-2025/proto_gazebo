@@ -59,11 +59,35 @@ def generate_launch_description():
         arguments=['0', '0', '0', '0', '0', '0', 'world', 'map']
     )
 
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["joint_state_broadcaster", "-c", "/controller_manager"],
+        output="screen",
+    )
+    
+    rear_drive_spawner = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["rear_wheel_velocity_controller", "-c", "/controller_manager"], 
+        output="screen",
+    )
+    
+    front_steering_spawner = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["front_steering_controller", "-c", "/controller_manager"],
+        output="screen",
+    )
+
     return LaunchDescription([
         use_sim_time,
         world_file_arg,
         gazebo,
         description_launch,
         spawn_robot,
+        joint_state_broadcaster_spawner,
+        rear_drive_spawner,
+        front_steering_spawner
         # static_map_to_odom
     ])
