@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="default">
+
+    <!-- Ground and Sun -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- Include your racetrack model -->
+    <include>
+      <uri>model://karting_club_model</uri>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+
+    <include>
+      <name>obstacle_01</name>
+      <uri>model://obstacle</uri>
+      <pose>71.1913 -20.2798 -1.65742 -0.006525 -0.012361 -3.08294</pose>
+    </include>
+
+    <include>
+      <name>obstacle_02</name>
+      <uri>model://obstacle</uri>
+      <pose>64.8509 -18.9607 -1.65742 -0.006525 -0.012361 -3.08294</pose>
+    </include>
+
+    <include>
+      <name>obstacle_03</name>
+      <uri>model://obstacle</uri>
+      <pose>68.5203 -28.5339 -1.65742 -0.006525 -0.012361 -3.08294</pose>
+    </include>
+
+    <include>
+      <name>obstacle_04</name>
+      <uri>model://obstacle</uri>
+      <pose>62.5289 -28.3764 -1.65742 -0.006525 -0.012361 -3.08294</pose>
+    </include>
+
+    <include>
+      <name>obstacle_05</name>
+      <uri>model://obstacle</uri>
+      <pose>71.1474 -37.1461 -1.65742 -0.006525 -0.012361 -3.08294</pose>
+    </include>
+
+    <include>
+      <name>obstacle_06</name>
+      <uri>model://obstacle</uri>
+      <pose>64.7571 -37.0225 -1.65742 -0.006525 -0.012361 -3.08294</pose>
+    </include>
+
+    <include>
+      <name>obstacle_07</name>
+      <uri>model://obstacle</uri>
+      <pose>67.9839 -46.1726 -1.65742 -0.006525 -0.012361 -3.08294</pose>
+    </include>
+
+    <include>
+      <name>obstacle_08</name>
+      <uri>model://obstacle</uri>
+      <pose>62.0302 -45.6494 -1.65742 -0.006525 -0.012361 -3.08294</pose>
+    </include>
+
+    <plugin name="model_pose_publisher" filename="libmodel_pose_publisher.so">
+      <topicName>/mock_detected_obstacles</topicName>
+      <modelKeyword>obstacle</modelKeyword>
+    </plugin>
+
+  </world>
+</sdf>
