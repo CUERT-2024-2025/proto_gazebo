@@ -2,7 +2,7 @@ from setuptools import Command
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.actions import Node, SetParameter
 
@@ -13,22 +13,24 @@ def generate_launch_description():
 
     use_sim_time = SetParameter(name='use_sim_time', value=True)
 
-    world_path = PathJoinSubstitution(
-        [FindPackageShare(pkg_name), "worlds", "karting_club_world.world"]
+    world_name_arg = DeclareLaunchArgument(
+        'world',
+        default_value='karting_club',
+        description='Name of the world file (without .world extension)'
     )
 
-    world_file_arg = DeclareLaunchArgument(
-        'world',
-        default_value=world_path,
-        description='Full path to the world file to load'
-    )
+    world_path = PathJoinSubstitution([
+        FindPackageShare(pkg_name),
+        "worlds",
+        PythonExpression(["'", LaunchConfiguration('world'), ".world'"])
+    ])
 
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             FindPackageShare("gazebo_ros"), "/launch/gazebo.launch.py"
         ]),
         launch_arguments={
-            'world': LaunchConfiguration('world'),
+            'world': world_path,
             'extra_gazebo_args': '--verbose'  # This passes the flag correctly
         }.items()
     )
@@ -45,18 +47,12 @@ def generate_launch_description():
         arguments=[
             '-topic', 'robot_description',
             '-entity', 'my_robot',
-            '-x', '68',
-            '-y', '-1.6',
-            '-z', '-1.5',
-            '-Y', '1.53'
+            '-x', '67.968980',
+            '-y', '-0.543021',
+            '-z', '-2.130163',
+            '-Y', '1.540349'
         ],
         output='screen'
-    )
-
-    static_map_to_odom = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        arguments=['0', '0', '0', '0', '0', '0', 'world', 'map']
     )
 
     joint_state_broadcaster_spawner = Node(
@@ -82,12 +78,11 @@ def generate_launch_description():
 
     return LaunchDescription([
         use_sim_time,
-        world_file_arg,
+        world_name_arg,
         gazebo,
         description_launch,
         spawn_robot,
         joint_state_broadcaster_spawner,
         rear_drive_spawner,
         front_steering_spawner
-        # static_map_to_odom
     ])

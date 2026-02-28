@@ -39,8 +39,31 @@ ament_target_dependencies(mesh_to_pointcloud
   gazebo_ros
 )
 
-# Install plugin .so file
-install(TARGETS mesh_to_pointcloud
+# -------------------------------------------------------------
+# BUILD THE MODEL POSE PUBLISHER PLUGIN
+# -------------------------------------------------------------
+add_library(model_pose_publisher SHARED
+  plugins/model_pose_publisher.cpp
+)
+
+target_include_directories(model_pose_publisher PUBLIC
+  ${GAZEBO_INCLUDE_DIRS}
+  plugins
+)
+
+target_link_libraries(model_pose_publisher
+  ${GAZEBO_LIBRARIES}
+)
+
+ament_target_dependencies(model_pose_publisher
+  rclcpp
+  sensor_msgs
+  geometry_msgs
+  gazebo_ros
+)
+
+# Install plugin .so files
+install(TARGETS mesh_to_pointcloud model_pose_publisher
   LIBRARY DESTINATION lib
 )
 
