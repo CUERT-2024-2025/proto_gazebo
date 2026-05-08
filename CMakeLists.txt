@@ -62,8 +62,31 @@ ament_target_dependencies(model_pose_publisher
   gazebo_ros
 )
 
+# -------------------------------------------------------------
+# BUILD THE FRUSTUM FILTER SENSOR PLUGIN
+# -------------------------------------------------------------
+add_library(pc_frustum_filter SHARED
+  plugins/pc_frustum_filter.cpp
+)
+
+target_include_directories(pc_frustum_filter PUBLIC
+  ${GAZEBO_INCLUDE_DIRS}
+  plugins
+)
+
+target_link_libraries(pc_frustum_filter
+  ${GAZEBO_LIBRARIES}
+)
+
+ament_target_dependencies(pc_frustum_filter
+  rclcpp
+  sensor_msgs
+  geometry_msgs
+  gazebo_ros
+)
+
 # Install plugin .so files
-install(TARGETS mesh_to_pointcloud model_pose_publisher
+install(TARGETS mesh_to_pointcloud model_pose_publisher pc_frustum_filter
   LIBRARY DESTINATION lib
 )
 
