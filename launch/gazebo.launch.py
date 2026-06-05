@@ -1,6 +1,5 @@
-from setuptools import Command
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.substitutions import FindPackageShare
@@ -38,7 +37,8 @@ def generate_launch_description():
     description_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             FindPackageShare('proto_description'),'/launch/description.launch.py'
-        ])
+        ]),
+        launch_arguments={'sim_time': 'true'}.items()
     )
 
     spawn_robot = Node(
@@ -76,6 +76,26 @@ def generate_launch_description():
         output="screen",
     )
 
+    kinematics_node = Node(
+        package="proto_controller",
+        executable="kinematic_translator",
+        output="screen",
+    )
+
+    localization_launch = TimerAction(
+        period=5.0,  # wait for Gazebo + controllers to be ready
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([
+                    FindPackageShare('proto_localization'), '/launch/localization.launch.py'
+                ]),
+                launch_arguments={
+                    'use_sim_time': 'true',
+                }.items()
+            )
+        ]
+    )
+
     return LaunchDescription([
         use_sim_time,
         world_name_arg,
@@ -84,5 +104,7 @@ def generate_launch_description():
         spawn_robot,
         joint_state_broadcaster_spawner,
         rear_drive_spawner,
-        front_steering_spawner
+        front_steering_spawner,
+        kinematics_node,
+        localization_launch,
     ])
