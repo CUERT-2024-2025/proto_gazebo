@@ -65,7 +65,7 @@ def generate_launch_description():
     rear_drive_spawner = Node(
         package="controller_manager",
         executable="spawner.py",
-        arguments=["rear_wheel_velocity_controller", "-c", "/controller_manager"], 
+        arguments=["rear_wheel_effort_controller", "-c", "/controller_manager"], 
         output="screen",
     )
     
