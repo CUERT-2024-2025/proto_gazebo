@@ -1,5 +1,7 @@
+from ament_index_python import get_package_share_directory
+from build.lane_detector.lane_detector import lane_segmentation_node
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.substitutions import FindPackageShare
@@ -23,6 +25,14 @@ def generate_launch_description():
         "worlds",
         PythonExpression(["'", LaunchConfiguration('world'), ".world'"])
     ])
+
+    zed_interface_share = os.path.dirname(get_package_share_directory('zed_interfaces'))
+
+    # Add it to Gazebo's search paths
+    append_gazebo_path = SetEnvironmentVariable(
+        name='GAZEBO_MODEL_PATH',
+        value=[os.environ.get('GAZEBO_MODEL_PATH', ''), ':', zed_interface_share]
+    )
 
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
@@ -82,23 +92,53 @@ def generate_launch_description():
         output="screen",
     )
 
-    localization_launch = TimerAction(
-        period=5.0,  # wait for Gazebo + controllers to be ready
-        actions=[
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource([
-                    FindPackageShare('proto_localization'), '/launch/localization.launch.py'
-                ]),
-                launch_arguments={
-                    'use_sim_time': 'true',
-                }.items()
-            )
-        ]
+    # localization_launch = TimerAction(
+    #     period=5.0,  # wait for Gazebo + controllers to be ready
+    #     actions=[
+    #         IncludeLaunchDescription(
+    #             PythonLaunchDescriptionSource([
+    #                 FindPackageShare('proto_localization'), '/launch/localization.launch.py'
+    #             ]),
+    #             launch_arguments={
+    #                 'use_sim_time': 'true',
+    #             }.items()
+    #         )
+    #     ]
+    # )
+
+    obstacle_detector_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            FindPackageShare('obstacle_detector'), '/launch/obstacle_detector.launch.py'
+        ]),
+        launch_arguments={
+            'publish_obstacle_map': 'true',
+            'marker_width': '0.30',
+            'marker_height': '0.50',
+        }.items()
+    )
+
+    stop_line_detector_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            FindPackageShare('stop_line_detector'), '/launch/stop_line_detector.launch.py'
+        ]),
+        launch_arguments={
+            'publish_stop_line_markers': 'true',
+        }.items()
+    )
+
+    lane_segmentation_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            FindPackageShare('lane_detector'), '/launch/lane_segmentation.launch.py'
+        ]),
+        launch_arguments={
+            'publish_lane_markers': 'true',
+        }.items()
     )
 
     return LaunchDescription([
         use_sim_time,
         world_name_arg,
+        append_gazebo_path,
         gazebo,
         description_launch,
         spawn_robot,
@@ -106,5 +146,9 @@ def generate_launch_description():
         rear_drive_spawner,
         front_steering_spawner,
         kinematics_node,
-        localization_launch,
+        obstacle_detector_launch,
+        stop_line_detector_launch,
+        # localization_launch,
+        # obstacle_detector_launch,
+        # stop_line_detector_launch,
     ])
