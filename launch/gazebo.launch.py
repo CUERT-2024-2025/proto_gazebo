@@ -47,8 +47,8 @@ def generate_launch_description():
         arguments=[
             '-topic', 'robot_description',
             '-entity', 'my_robot',
-            '-x', '67.968980',
-            '-y', '-0.543021',
+            '-x', '68.251832',
+            '-y', '8.445032',
             '-z', '-2.130163',
             '-Y', '-1.601241'
         ],
@@ -82,6 +82,12 @@ def generate_launch_description():
         output="screen",
     )
 
+    reference_planner_node = Node(
+        package="pmpc_controller",
+        executable="reference_planner",
+        output="screen",
+    )
+
     localization_launch = TimerAction(
         period=5.0,  # wait for Gazebo + controllers to be ready
         actions=[
@@ -106,5 +112,6 @@ def generate_launch_description():
         rear_drive_spawner,
         front_steering_spawner,
         kinematics_node,
-        localization_launch,
+        reference_planner_node,
+        # localization_launch,
     ])
